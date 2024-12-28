@@ -12,8 +12,31 @@
   </div>
     <script>
     const webview = document.getElementById('webview');
-    webview.addEventListener('dom-ready', function() {
+    
+    // Store current zoom level
+    let currentZoom = 1.0;
+    
+    // Add IPC listeners for zoom controls
+    require('electron').ipcRenderer.on('zoom-in', () => {
+      currentZoom += 0.1;
+      webview.setZoomFactor(currentZoom);
+    });
 
+    require('electron').ipcRenderer.on('zoom-out', () => {
+      currentZoom -= 0.1;
+      if (currentZoom < 0.3) currentZoom = 0.3; // Prevent too much zoom out
+      webview.setZoomFactor(currentZoom);
+    });
+
+    require('electron').ipcRenderer.on('zoom-reset', () => {
+      currentZoom = 1.0;
+      webview.setZoomFactor(currentZoom);
+    });
+
+    webview.addEventListener('dom-ready', function() {
+      // Set initial zoom if desired
+      // webview.setZoomFactor(0.6);
+      
       // hide message below text input, sidebar, suggestions on new chat
       webview.insertCSS(`
         .text-xs.text-center {

@@ -88,21 +88,49 @@ app.on("ready", () => {
           shell.openExternal("https://twitter.com/vincelwt");
         },
       },
+      {
+        type: "separator",
+      },
+      {
+        label: "Zoom",
+        submenu: [
+          {
+            label: "Zoom In",
+            accelerator: "CommandOrControl+=",
+            click: () => {
+              const webContents = mb.window.webContents;
+              const currentZoom = webContents.getZoomFactor();
+              webContents.setZoomFactor(currentZoom + 0.1);
+            }
+          },
+          {
+            label: "Zoom Out",
+            accelerator: "CommandOrControl+-",
+            click: () => {
+              const webContents = mb.window.webContents;
+              const currentZoom = webContents.getZoomFactor();
+              const newZoom = Math.max(0.3, currentZoom - 0.1);
+              webContents.setZoomFactor(newZoom);
+            }
+          },
+          {
+            label: "Reset Zoom",
+            accelerator: "CommandOrControl+0",
+            click: () => {
+              mb.window.webContents.setZoomFactor(1.0);
+            }
+          }
+        ]
+      },
     ];
 
     tray.on("right-click", () => {
       mb.tray.popUpContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
     });
 
-    tray.on("click", (e) => {
-      //check if ctrl or meta key is pressed while clicking
-      e.ctrlKey || e.metaKey
-        ? mb.tray.popUpContextMenu(Menu.buildFromTemplate(contextMenuTemplate))
-        : null;
-    });
     const menu = new Menu();
 
-    globalShortcut.register("CommandOrControl+Shift+g", () => {
+    globalShortcut.register("Command+Control+c", () => {
       if (window.isVisible()) {
         mb.hideWindow();
       } else {
@@ -139,13 +167,28 @@ app.on("ready", () => {
       contents.on("before-input-event", (event, input) => {
         const { control, meta, key } = input;
         if (!control && !meta) return;
-        if (key === "c") contents.copy();
-        if (key === "v") contents.paste();
-        if (key === "a") contents.selectAll();
-        if (key === "z") contents.undo();
-        if (key === "y") contents.redo();
-        if (key === "q") app.quit();
-        if (key === "r") contents.reload();
+        
+        switch(key) {
+          case "=":
+          case "+":
+          case "plus":
+          case "Equal":
+            contents.setZoomFactor(contents.getZoomFactor() + 0.1);
+            break;
+          case "-":
+            contents.setZoomFactor(Math.max(0.3, contents.getZoomFactor() - 0.1));
+            break;
+          case "0":
+            contents.setZoomFactor(1.0);
+            break;
+          case "c": contents.copy(); break;
+          case "v": contents.paste(); break;
+          case "a": contents.selectAll(); break;
+          case "z": contents.undo(); break;
+          case "y": contents.redo(); break;
+          case "q": app.quit(); break;
+          case "r": contents.reload(); break;
+        }
       });
     }
   });
