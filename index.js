@@ -52,22 +52,37 @@ app.on("ready", () => {
     }
 
     const contextMenuTemplate = [
-      // add links to github repo and vince's twitter
       {
         label: "New Chat",
         accelerator: "Command+N",
         click: () => {
+          if (!window.isVisible()) return;
           const webContents = mb.window.webContents;
-          webContents.executeJavaScript(
-            `document.querySelector('webview').executeJavaScript('document.querySelector(\\'[data-testid="create-new-chat-button"]\\').click()')`
-          );
+          webContents.executeJavaScript(`
+            document.querySelector('webview').executeJavaScript('document.querySelector(\\'[data-testid="create-new-chat-button"]\\').click()')
+          `);
         },
       },
       {
-        label: "Quit",
-        accelerator: "Command+Q",
+        label: "Open new chat in browser",
+        accelerator: "Command+Shift+N",
         click: () => {
-          app.quit();
+          if (!window.isVisible()) return;
+          shell.openExternal('https://chat.openai.com/chat');
+        },
+      },
+      {
+        label: "Open current chat in browser",
+        accelerator: "Command+O",
+        click: () => {
+          if (!window.isVisible()) return;
+          const webContents = mb.window.webContents;
+          // Get the webview element's current URL
+          webContents.executeJavaScript(`
+            document.querySelector('webview')?.getAttribute('src') || 'https://chat.openai.com/chat'
+          `).then(currentUrl => {
+            shell.openExternal(currentUrl);
+          });
         },
       },
       {
@@ -75,12 +90,6 @@ app.on("ready", () => {
         accelerator: "Command+R",
         click: () => {
           window.reload();
-        },
-      },
-      {
-        label: "Open in browser",
-        click: () => {
-          shell.openExternal("https://chat.openai.com/chat");
         },
       },
       {
@@ -132,6 +141,16 @@ app.on("ready", () => {
           }
         ]
       },
+      {
+        type: "separator",
+      },
+      {
+        label: "Quit",
+        accelerator: "Command+Q",
+        click: () => {
+          app.quit();
+        },
+      },
     ];
 
     tray.on("right-click", () => {
@@ -161,9 +180,32 @@ app.on("ready", () => {
             label: 'New Chat',
             accelerator: 'Command+N',
             click: () => {
-              window.webContents.executeJavaScript(
-                'document.querySelector(\'[data-testid="create-new-chat-button"]\').click()'
-              );
+              if (!window.isVisible()) return;
+              const webContents = mb.window.webContents;
+              webContents.executeJavaScript(`
+                document.querySelector('webview').executeJavaScript('document.querySelector(\\'[data-testid="create-new-chat-button"]\\').click()')
+              `);
+            }
+          },
+          {
+            label: 'Open New Chat in Browser',
+            accelerator: 'Command+Shift+N',
+            click: () => {
+              if (!window.isVisible()) return;
+              shell.openExternal('https://chat.openai.com/chat');
+            }
+          },
+          {
+            label: 'Open Current Chat in Browser',
+            accelerator: 'Command+O',
+            click: () => {
+              if (!window.isVisible()) return;
+              const webContents = mb.window.webContents;
+              webContents.executeJavaScript(`
+                document.querySelector('webview')?.getAttribute('src') || 'https://chat.openai.com/chat'
+              `).then(currentUrl => {
+                shell.openExternal(currentUrl);
+              });
             }
           }
         ]
@@ -197,11 +239,6 @@ app.on("ready", () => {
         if (!control && !meta) return;
         
         switch(key) {
-          case "n": 
-            contents.executeJavaScript(
-              'document.querySelector(\'[data-testid="create-new-chat-button"]\').click()'
-            );
-            break;
           case "=":
           case "+":
           case "plus":
