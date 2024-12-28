@@ -96,7 +96,7 @@ app.on("ready", () => {
         submenu: [
           {
             label: "Zoom In",
-            accelerator: "CommandOrControl+=",
+            accelerator: "CommandOrControl+Plus",
             click: () => {
               const webContents = mb.window.webContents;
               const currentZoom = webContents.getZoomFactor();
