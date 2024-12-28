@@ -54,6 +54,16 @@ app.on("ready", () => {
     const contextMenuTemplate = [
       // add links to github repo and vince's twitter
       {
+        label: "New Chat",
+        accelerator: "Command+N",
+        click: () => {
+          const webContents = mb.window.webContents;
+          webContents.executeJavaScript(
+            `document.querySelector('webview').executeJavaScript('document.querySelector(\\'[data-testid="create-new-chat-button"]\\').click()')`
+          );
+        },
+      },
+      {
         label: "Quit",
         accelerator: "Command+Q",
         click: () => {
@@ -142,7 +152,25 @@ app.on("ready", () => {
       }
     });
 
-    Menu.setApplicationMenu(menu);
+    // Create application menu with shortcuts
+    const menuTemplate = [
+      {
+        label: 'File',
+        submenu: [
+          {
+            label: 'New Chat',
+            accelerator: 'Command+N',
+            click: () => {
+              window.webContents.executeJavaScript(
+                'document.querySelector(\'[data-testid="create-new-chat-button"]\').click()'
+              );
+            }
+          }
+        ]
+      }
+    ];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
     // open devtools
     // window.webContents.openDevTools();
@@ -169,6 +197,11 @@ app.on("ready", () => {
         if (!control && !meta) return;
         
         switch(key) {
+          case "n": 
+            contents.executeJavaScript(
+              'document.querySelector(\'[data-testid="create-new-chat-button"]\').click()'
+            );
+            break;
           case "=":
           case "+":
           case "plus":
